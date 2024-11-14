@@ -1,21 +1,21 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.time.LocalDate;
 
-record Borrow(Book book, User user, int days){}
 
+public final class Library {
 
-class Library {
     private final int max_borrow_day = 15;
     final List<User> users = new ArrayList<>();
     final List<Book> books = new ArrayList<>();
     final List<Borrow> borrows = new ArrayList<>();
-
 
     public void registerUser(User user) {
         users.add(user);
     }
 
     public User getUser(String username){
+
         for (User user : users) {
             if (user.name.equals(username)) {
                 return user;
@@ -52,7 +52,7 @@ class Library {
     }
 
     public Borrow barrowBook(Book book, User user){
-        Borrow borrow = new Borrow(book, user, max_borrow_day);
+        Borrow borrow = new Borrow(book, user, max_borrow_day, LocalDate.now());
         borrows.add(borrow);
         return borrow;
     }

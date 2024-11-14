@@ -1,3 +1,4 @@
+import java.time.LocalDate;
 import java.util.Scanner;
 
 public class Program {
@@ -38,12 +39,13 @@ public class Program {
                     + line ;
 
     String borrow_section =
-            " \n you are in the users section "
+            " \n you are in the borrow section "
                     + line +
                     " select what you want to do:\n" +
                     " 2.1) new\n" +
                     " 2.2) return \n" +
                     " 2.3) renew \n" +
+                    " 2.4) all" +
                     " 2.0) back"
                     + line ;
 
@@ -94,10 +96,14 @@ public class Program {
                     deleteUser(); break;
                 case "4", "query":
                     queryUser(); break;
+
+                case "5", "all":
+                    myLibrary.users.forEach(user -> print(user));break ;
+
                 case "help":
                     print(users_section);break;
 
-                case "back", "exit":
+                case "back", "exit", ";":
                     break w;
                 default:
                     print("unknown command");
@@ -105,30 +111,76 @@ public class Program {
         }
     }
 
+    public void bookSection() {
+        print(book_section);
+        String state;
+        w: while (true){
+            print("1) enter command: ");
+            state = scanner.next();
+            switch (state) {
+                case "1", "register":
+                    registerBook();
+                    break;
+                case "2":
+                    updateBook();
+                    break;
+                case "3":
+                    deleteBook();
+                    break;
+                case "4":
+                    queryBook();
+                    break;
+
+                case "5", "all":
+                    myLibrary.books.forEach(book -> print(book));break;
+
+                case "back", "exit", ";":
+                    break w;
+                default:
+                    print("unknown command");
+                    break;
+
+            }
+        }
+    }
+
     public void borrowSection() {
         print(borrow_section);
         String state;
-        w: while (true) {
+        w:
+        while (true) {
             print("3) enter command: ");
             state = scanner.next();
             switch (state) {
                 case "1", "new":
-                    borrowBook(); break;
+                    borrowBook();
+                    break;
                 case "2", "renew":
-//                    updateUser(); break;
+                    renewBorrow(); break;
                 case "3", "return":
-//                    deleteUser(); break;
-                case "4":
-//                    queryUser(); break;
+                    returnBorrow(); break;
+                case "4", "all":
+                    myLibrary.borrows.forEach(borrow -> print(borrow));break ;
 
-                case "back", "exit":
+                case "back", "exit", ";":
                     break w;
                 case "help":
-                    print(users_section);break;
+                    print(users_section);
+                    break;
                 default:
                     print("unknown command");
             }
         }
+    }
+
+    private void returnBorrow() {
+        Book book = getBook("3.2");
+        if(myLibrary.borrows.removeIf(borrow -> borrow.book == book)){
+            print("book "+book+" returned"); return;
+        }
+
+        print("book "+book+" has not borrowed");
+
     }
 
     public void borrowBook(){
@@ -138,16 +190,22 @@ public class Program {
         print("3.1) enter user name: ");
         User user = myLibrary.getUser(scanner.next());
 
-        myLibrary.barrowBook(book, user);
+        Borrow brw = myLibrary.barrowBook(book, user);
+        print("book borrowed sucssesfuly " + brw);
     }
 
-    public User getUser(String level){
-        print(level +" enter the user name ");
-        return myLibrary.getUser(scanner.next());
+    public void renewBorrow(){
+        // find the borrow object by book
+        Book book = getBook("3.2");
+        Borrow borrow = myLibrary.borrows.stream().filter(borrow1 -> borrow1.book==book).findFirst().get();
+
+        // update the borrow time
+        borrow.brwdate = LocalDate.now();
+        print(borrow + "has renewed");
     }
 
     public void registerUser() {
-        print("2.1) enter user name: ");
+        print("2.1) enter user name ");
         String user_name = scanner.next();
 
         print("2.1) enter user age: ");
@@ -187,36 +245,6 @@ public class Program {
             print("User found: " + user);
         } else {
             print("User " + user_name + " not found");
-        }
-    }
-
-    public void bookSection() {
-        print(book_section);
-        String state;
-        w: while (true){
-            print("1) enter command: ");
-            state = scanner.next();
-            switch (state) {
-                case "1", "register":
-                    registerBook();
-                    break;
-                case "2":
-                    updateBook();
-                    break;
-                case "3":
-                    deleteBook();
-                    break;
-                case "4":
-                    queryBook();
-                    break;
-
-                case "back", "exit":
-                    break w;
-                default:
-                    print("unknown command");
-                    break;
-
-            }
         }
     }
 
@@ -265,6 +293,16 @@ public class Program {
         } else {
             print("Book " + book_title + " not found");
         }
+    }
+
+    public User getUser(String level){
+        print(level +" enter the user name ");
+        return myLibrary.getUser(scanner.next());
+    }
+
+    public Book getBook(String level){
+        print(level +" enter the book title ");
+        return myLibrary.getBook(scanner.next());
     }
 
     <T> void print(T input) {
